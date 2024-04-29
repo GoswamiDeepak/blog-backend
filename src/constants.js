@@ -1,1 +1,1 @@
-const DB_NAME = 'fullstack-blog';
+export const DB_NAME = 'fullstack-blog';
