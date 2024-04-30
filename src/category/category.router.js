@@ -1,7 +1,7 @@
 import express from 'express';
+const categoryRouter = express.Router();
 import { createCategory } from './category.controller.js';
 
-const categoryRouter = express.Router();
 
 categoryRouter.get('/', createCategory);
 
