@@ -15,6 +15,7 @@ app.use(express.static('./public'));
 // routes************************
 import categoryRouter from './category/category.router.js';
 import userRouter from './user/user.router.js';
+
 app.use('/api/v1/category', categoryRouter);
 app.use('/api/v1/users', userRouter);
 
