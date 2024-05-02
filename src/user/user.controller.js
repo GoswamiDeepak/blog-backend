@@ -1,7 +1,7 @@
 import { User } from './user.model.js';
 
 const createUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, usertype } = req.body;
     const isExit = await User.findOne({ email });
     if (isExit) {
         return res.status(400).json({
@@ -12,8 +12,9 @@ const createUser = async (req, res) => {
         name,
         email,
         password,
+        userType: usertype && usertype,
     });
-    
+
     return res.status(201).json({
         data: user,
         message: 'user created!',
