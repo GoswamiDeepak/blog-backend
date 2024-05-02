@@ -13,6 +13,7 @@ const createUser = async (req, res) => {
         email,
         password,
     });
+    
     return res.status(201).json({
         data: user,
         message: 'user created!',
