@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static('./public'));
 
 app.get('/', (req, res) => {
+    //server testing
     res.send('Welcome');
 });
 

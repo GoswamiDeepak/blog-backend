@@ -1,7 +1,8 @@
+import { generateAccessAndRefreshTokens } from '../utils/generateAccess&RefreshToken.js';
 import sendmail from '../utils/mailer.js';
 import { User } from './user.model.js';
 
-const createUser = async (req, res) => {
+const registerUser = async (req, res) => {
     //TODOS: check validation
     const { name, email, password, usertype } = req.body;
     const isExit = await User.findOne({ email });
@@ -16,7 +17,7 @@ const createUser = async (req, res) => {
         password,
         userType: usertype && usertype,
     });
-    await sendmail(user.email, 'verify', `welcome ${user.name}`);
+    // await sendmail(user.email, 'verify', `welcome ${user.name}`);
     return res.status(201).json({
         data: user,
         message: 'user created!',
@@ -24,23 +25,28 @@ const createUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-    //validation 
+    //validation
     const { email, password } = req.body;
+
     const user = await User.findOne({ email });
+
     if (!user) {
         res.status(400).json({
             message: 'User not found!',
         });
     }
+
     const validPassword = await user.isPasswordCompare(password);
+
     if (!validPassword) {
         res.status(400).json({
             message: 'Invalid password!',
         });
     }
 
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+        user_id
+    );
 
     res.status(200).json({
         data: user,
@@ -49,4 +55,4 @@ const loginUser = async (req, res) => {
     });
 };
 
-export { createUser, loginUser }; 
+export { registerUser, loginUser };
