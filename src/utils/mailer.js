@@ -28,7 +28,7 @@ const sendmail = async (email, emailType, userId) => {
                 emailType === 'VERIFY'
                     ? 'Verify your email'
                     : 'Reset your password',
-            html: `<p>Click <a href="http://localhost:3000/verifyemail?token=${hashedToken}">here</a> to ${
+            html: `<p style="text-align:center;">Click <a href="http://localhost:3000/verifyemail?token=${hashedToken}">here</a> to ${
                 emailType === 'VERIFY'
                     ? 'verify your email'
                     : 'reset your password'
