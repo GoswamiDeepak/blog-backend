@@ -74,13 +74,15 @@ const loginUser = asyncHandler(async (req, res) => {
         }
 
         const { accessToken, refreshToken } =
-            await generateAccessAndRefreshTokens(user_id);
+            await generateAccessAndRefreshTokens(user._id);
 
-        res.status(200).json({
-            data: user,
-            accessToken,
-            refreshToken,
-        });
+        res.status(200).json(
+            new ApiResponse(200, {
+                data: user,
+                accessToken,
+                refreshToken,
+            })
+        );
     } catch (error) {
         console.log(error);
         throw new ApiError(
@@ -106,18 +108,21 @@ const verifyUser = asyncHandler(async (req, res) => {
             verifyTokenExpiry: { $gt: Date.now() },
         });
         if (!user) {
-            throw new ApiError(400, 'Invalid token !');
+            throw new ApiError(400, 'Token has been expired or Invalid!');
         }
         user.isVerified = true;
         user.verifiyToken = undefined;
         user.verifyTokenExpiry = undefined;
+        user.save();
 
         res.status(200).json(
             new ApiResponse(200, 'Email verified successfully !!')
         );
-
     } catch (error) {
-        console.log(error);
+        throw new ApiError(
+            error.statusCode || 500,
+            error.message || 'Internal server error'
+        );
     }
 });
 
@@ -163,4 +168,4 @@ const refreshTokenGenerate = asyncHandler(async (req, res) => {
     }
 });
 
-export { registerUser, loginUser, refreshTokenGenerate };
+export { registerUser, loginUser, refreshTokenGenerate, verifyUser };

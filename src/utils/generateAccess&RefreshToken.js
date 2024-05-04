@@ -11,10 +11,10 @@ export const generateAccessAndRefreshTokens = async (id) => {
     try {
         const user = await User.findById(id);
         const accessToken = await user.generateAccessToken();
-        const refrshToken = await user.generateRefreshToken();
-        user.refreshToken = refrshToken;
-        await user.save({ validateBeforeSave: false });
-        return { accessToken, refrshToken };
+        const refreshToken = await user.generateRefreshToken();
+        user.refreshToken = refreshToken;
+        await user.save({ validateBeforeSave: false }); 
+        return { accessToken, refreshToken };
     } catch (error) {
         console.log(error);
     }
