@@ -4,6 +4,7 @@ dotenv.config();
 export const config = {
     port: process.env.PORT,
     db: process.env.MONGODB_URL,
+    frontend: process.env.FRONTEND_URL,
     mongo_db: process.env.MONGO_DB_URL,
     secret: process.env.ACCESS_TOKEN_SECRET,
     secret_time: process.env.ACCESS_TOKEN_EXPIRY,

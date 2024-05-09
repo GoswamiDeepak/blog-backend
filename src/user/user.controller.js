@@ -16,7 +16,7 @@ const registerUser = asyncHandler(async (req, res) => {
         }
         const isExit = await User.findOne({ email });
         if (isExit) {
-            throw new ApiError(400, 'User already exist!');
+            throw new ApiError(401, 'User already exist!');
         }
         const user = await User.create({
             name,
@@ -54,7 +54,6 @@ const loginUser = asyncHandler(async (req, res) => {
         //[+] send access and refresh token to user
 
         const { email, password } = req.body;
-
         const user = await User.findOne({ email });
 
         if (!user) {
@@ -68,20 +67,28 @@ const loginUser = asyncHandler(async (req, res) => {
         const validPassword = await user.isPasswordCompare(password);
 
         if (!validPassword) {
-            res.status(400).json({
-                message: 'Invalid password!',
-            });
+            throw new ApiError(401, 'Invalid password!');
         }
 
         const { accessToken, refreshToken } =
             await generateAccessAndRefreshTokens(user._id);
-
+        console.log(accessToken);
+        console.log(refreshToken);
+        const userModified = await User.findById(user._id, {
+            name: 1,
+            email: 1,
+            userType: 1,
+        });
         res.status(200).json(
-            new ApiResponse(200, {
-                data: user,
-                accessToken,
-                refreshToken,
-            })
+            new ApiResponse(
+                200,
+                {
+                    data: userModified,
+                    accessToken,
+                    refreshToken,
+                },
+                'Login SuccessFully !!!'
+            )
         );
     } catch (error) {
         console.log(error);
@@ -108,7 +115,7 @@ const verifyUser = asyncHandler(async (req, res) => {
             verifyTokenExpiry: { $gt: Date.now() },
         });
         if (!user) {
-            throw new ApiError(400, 'Token has been expired or Invalid!');
+            throw new ApiError(403, 'Token has been expired or Invalid!');
         }
         user.isVerified = true;
         user.verifiyToken = undefined;
@@ -126,6 +133,71 @@ const verifyUser = asyncHandler(async (req, res) => {
     }
 });
 
+const forgetPassword = asyncHandler(async (req, res) => {
+    //[+] take email from user's body
+    //[+] verify email from document that user is exist
+    //[+] call sendMail function and pass email, emailType=RESET and userId, send mail
+    //[+] send response to cliend that email send to client to click
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new ApiError(400, 'User not found !');
+        }
+        const mailResponse = await sendmail(email, 'RESET', user._id);
+        if (!mailResponse) {
+            throw new ApiError(
+                500,
+                'Cound not send Reset-Email due to internal issue !!!'
+            );
+        }
+        res.status(200).json(
+            new ApiResponse(200, 'Reset password link send to your email.!!!')
+        );
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(
+            error.statusCode || 500,
+            error.message || 'Internal server Error'
+        );
+    }
+});
+
+const verifyResetToken = asyncHandler(async (req, res) => {
+    try {
+        const { forgotPasswordToken, newPassword } = req.body;
+        if (!forgotPasswordToken) {
+            throw new ApiError(400, 'Forget password token is required !');
+        }
+        const user = await User.findOne({
+            forgotPasswordToken,
+            forgotPasswordTokenExpiry: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            throw new ApiError(
+                401,
+                'Forget password token has been expired or Invalid'
+            );
+        }
+
+        user.forgotPasswordToken = undefined;
+        user.forgotPasswordTokenExpiry = undefined;
+        user.password = newPassword;
+        user.save();
+
+        res.status(200).json(
+            new ApiResponse(200, 'Forget-password token has been verifed')
+        );
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(
+            error.statusCode || 500,
+            error.message || 'Internal server issue !!!'
+        );
+    }
+});
+
 const refreshTokenGenerate = asyncHandler(async (req, res) => {
     //[+] get refresh token from user by body
     //[+] verify token by jwt verify
@@ -135,11 +207,11 @@ const refreshTokenGenerate = asyncHandler(async (req, res) => {
     //[+] generate new access and refresh token
     //[+] save new refresh token to user
     //[+] send response
-
+ 
     try {
         const refreshToken = req.body.refreshToken;
         if (!refreshToken) {
-            throw new ApiError(401, 'Require refreshToken !');
+            throw new ApiError(401, 'Require refreshToken !'); 
         }
 
         const decodedRefreshToken = jwt.verify(refreshToken, config.refresh);
@@ -168,4 +240,11 @@ const refreshTokenGenerate = asyncHandler(async (req, res) => {
     }
 });
 
-export { registerUser, loginUser, refreshTokenGenerate, verifyUser };
+export {
+    registerUser,
+    loginUser,
+    refreshTokenGenerate,
+    verifyUser,
+    forgetPassword,
+    verifyResetToken,
+};

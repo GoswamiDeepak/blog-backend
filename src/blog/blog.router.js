@@ -1,7 +1,11 @@
 import express from 'express';
-import { createBlog } from './blog.controller.js';
+import { createBlog, getBlog } from './blog.controller.js';
+import { auth } from '../middlewares/auth.middleware.js';
+import { upload } from '../middlewares/multer.middleware.js';
+
 const blogRouter = express.Router();
 
-blogRouter.get('/', createBlog);
+blogRouter.get('/', getBlog);
+blogRouter.post('/create-blog', upload.single('image'), createBlog);
 
 export default blogRouter;

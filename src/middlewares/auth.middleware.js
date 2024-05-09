@@ -1,8 +1,9 @@
 import { config } from '../app-config/config.js';
-import { ApiError } from '../utils/apiError';
+import { ApiError } from '../utils/apiError.js';
 import jwt from 'jsonwebtoken';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
-export const auth = (req, res, next) => {
+export const auth = asyncHandler((req, res, next) => {
     //[-] check accessToken form req.cookies.accessToken
     //[-] check accessToken from req.headers.authorization
     //[-] check accessToekn from req.header('Authorization')
@@ -11,15 +12,19 @@ export const auth = (req, res, next) => {
 
     try {
         const token =
-            req.cookies.accessToken ||
+            req?.cookies?.accessToken ||
             req.header('Authorization')?.replace('Bearer ', '');
         if (!token) {
-            throw new ApiError(401, 'Invalid Token !!!');
+            throw new ApiError(400, 'Access Token required !!!');  
         }
-        const decoded = jwt.verify(token, config.secret);
+        const decoded = jwt.verify(token, config.secret); 
+        if (!decoded) {
+            throw new ApiError(401, 'Access Token has been expired !!!');
+        }
         req.user = decoded;
         next();
     } catch (error) {
-        throw new ApiError(401, 'Unauthorized request !!!');
+        console.log(error);
+        throw new ApiError(error.statusCode || 401 , error.message);
     }
-};
+});
