@@ -30,7 +30,7 @@ const createBlog = asyncHandler(async (req, res) => {
         });
         const modifiedCategory = [category].map((id) => id.split(','));
         const ids = modifiedCategory.flat();
-        
+
         const isUpdated = await Blog.findByIdAndUpdate(
             blog._id,
             {
@@ -51,4 +51,20 @@ const createBlog = asyncHandler(async (req, res) => {
     }
 });
 
-export { createBlog, getBlog };
+const deleteBlog = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (id) {
+        throw new ApiError(400, 'Required blog id!!');
+    }
+    try {
+        const isDelete = await Blog.findByIdAndDelete(id);
+        if (!isDelete) {
+            throw new ApiError(500, 'Internal Server Issue !!');
+        }
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(error.statusCode, error.message);
+    }
+});
+
+export { createBlog, getBlog, deleteBlog };
