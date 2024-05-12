@@ -28,13 +28,14 @@ const createCategory = asyncHandler(async (req, res) => {
 
 const getCategory = asyncHandler(async (req, res) => {
     const page = req?.query?.page || 1;
-    const limit = req?.query?.limit || 2;
+    const limit = req?.query?.limit || 10;
     try {
         const totalCount = await Category.countDocuments();
         const totalPage = Math.ceil(totalCount / limit);
         const skip = (page - 1) * limit;
 
         const category = await Category.find({}, { user: 0, __v: 0 })
+            .sort({ category: -1 })
             .skip(skip)
             .limit(limit);
         const hasNextPage = page < totalPage;

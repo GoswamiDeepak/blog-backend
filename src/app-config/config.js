@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const config = {
+export const config = { 
     port: process.env.PORT,
     db: process.env.MONGODB_URL,
     frontend: process.env.FRONTEND_URL,
@@ -17,4 +17,5 @@ export const config = {
     smtp_port: process.env.SMTP_PORT,
     username: process.env.SMTP_USERNAME,
     password: process.env.SMTP_BRAVO_PASSWORD,
+    production: process.env.PRODUCTION,
 };

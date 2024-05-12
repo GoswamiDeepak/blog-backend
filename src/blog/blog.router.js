@@ -6,6 +6,6 @@ import { upload } from '../middlewares/multer.middleware.js';
 const blogRouter = express.Router();
 
 blogRouter.get('/', getBlog);
-blogRouter.post('/create-blog', upload.single('image'), createBlog);
+blogRouter.post('/create-blog', auth, upload.single('image'), createBlog); 
 
 export default blogRouter;
